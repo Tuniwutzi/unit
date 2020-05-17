@@ -77,8 +77,16 @@ void comparisons() {
 }
 
 template<typename A, typename B>
-void add(A a, B b) {
+void addsub(A a, B b) {
     std::cout << a << " + " << b << " = " << (a+b) << std::endl;
+    if constexpr (!std::is_same_v<std::decay_t<A>, std::decay_t<B>>) {
+        std::cout << b << " + " << a << " = " << (b+a) << std::endl;
+    }
+    
+    std::cout << a << " - " << b << " = " << (a-b) << std::endl;
+    if constexpr (!std::is_same_v<std::decay_t<A>, std::decay_t<B>>) {
+        std::cout << b << " - " << a << " = " << (b-a) << std::endl;
+    }
 }
 void addition() {
     jb::unit::CentiMeters cm(1000);
@@ -89,25 +97,21 @@ void addition() {
     jb::unit::DegreeCelsius c(10);
     jb::unit::DegreeFarenheit f(10);
 
-    add(m, m);
-    add(cm, cm);
-    add(km, km);
+    addsub(m, m);
+    addsub(cm, cm);
+    addsub(km, km);
     
-    add(m, cm);
-    add(cm, m);
-    add(m, km);
-    add(km, m);
-    add(km, cm);
-    add(cm, km);
+    addsub(m, cm);
+    addsub(m, km);
+    addsub(km, cm);
 
     // completely different units
-    // add(g, m);
-    // add(g, f);
+    // addsub(g, m);
+    // addsub(g, f);
 
     // implicitly convertible units, but with different base_units
     // Future: we can _maybe_ allow this for units with the same 0-element (so NOT fahrenheit and celsius)
-    // add(c, f);
-    // add(f, c);
+    // addsub(c, f);
 }
 
 int main() {
