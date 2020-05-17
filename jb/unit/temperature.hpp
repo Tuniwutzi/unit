@@ -5,19 +5,23 @@
 namespace jb {
 namespace unit {
     
-namespace _base_units {
-struct Celsius;
-struct Farenheit;
+namespace base_units {
+struct Celsius {
+    inline static const char* symbol = "°C";
+};
+struct Farenheit {
+    inline static const char* symbol = "°F";
+};
 }
     
-using DegreeCelsius = Unit<_base_units::Celsius, std::ratio<1>, float>;
-using DegreeFarenheit = Unit<_base_units::Farenheit, std::ratio<1>, float>;
+using DegreeCelsius = Unit<base_units::Celsius, std::ratio<1>, float>;
+using DegreeFarenheit = Unit<base_units::Farenheit, std::ratio<1>, float>;
 
 template<typename FROM_RATIO, typename FROM_REP, typename TO_RATIO, typename TO_REP>
-class UnitConverter<Unit<_base_units::Celsius, FROM_RATIO, FROM_REP>, Unit<_base_units::Farenheit, TO_RATIO, TO_REP>> {
+class UnitConverter<Unit<base_units::Celsius, FROM_RATIO, FROM_REP>, Unit<base_units::Farenheit, TO_RATIO, TO_REP>> {
 public:
-    using from_unit = Unit<_base_units::Celsius, FROM_RATIO, FROM_REP>;
-    using to_unit = Unit<_base_units::Farenheit, TO_RATIO, TO_REP>;
+    using from_unit = Unit<base_units::Celsius, FROM_RATIO, FROM_REP>;
+    using to_unit = Unit<base_units::Farenheit, TO_RATIO, TO_REP>;
 
     using normalizing_converter = UnitConverter<from_unit, DegreeCelsius>;
     using target_converter = UnitConverter<DegreeFarenheit, to_unit>;
@@ -37,10 +41,10 @@ public:
     }
 };
 template<typename FROM_RATIO, typename FROM_REP, typename TO_RATIO, typename TO_REP>
-class UnitConverter<Unit<_base_units::Farenheit, FROM_RATIO, FROM_REP>, Unit<_base_units::Celsius, TO_RATIO, TO_REP>> {
+class UnitConverter<Unit<base_units::Farenheit, FROM_RATIO, FROM_REP>, Unit<base_units::Celsius, TO_RATIO, TO_REP>> {
 public:
-    using from_unit = Unit<_base_units::Farenheit, FROM_RATIO, FROM_REP>;
-    using to_unit = Unit<_base_units::Celsius, TO_RATIO, TO_REP>;
+    using from_unit = Unit<base_units::Farenheit, FROM_RATIO, FROM_REP>;
+    using to_unit = Unit<base_units::Celsius, TO_RATIO, TO_REP>;
 
     using normalizing_converter = UnitConverter<from_unit, DegreeFarenheit>;
     using target_converter = UnitConverter<DegreeCelsius, to_unit>;

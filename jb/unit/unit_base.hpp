@@ -13,7 +13,8 @@ namespace unit {
 
 Def.:
 Einheit = BASE_UNIT
-Andere Einheit = !unit_convertible_v<BASE_UNIT, OTHER_BASE_UNIT>
+Selbe Einheit = IsConvertableTo<BASE_UNIT, OTHER_BASE_UNIT>
+Andere Einheit = !IsConvertableTo<BASE_UNIT, OTHER_BASE_UNIT>
 
 Zuweisung:
     Selbe Einheit:
@@ -85,6 +86,18 @@ public:
         
         using to_unit = Unit<TO_BASE_UNIT, TO_RATIO, TO_REP>;
         return to_unit(ConverterTo<to_unit>::convert(_count));
+    }
+
+    template<typename OTHER_BASE_UNIT, typename OTHER_RATIO, typename OTHER_REP,
+             typename = std::enable_if_t<IsImplicitlyConvertibleTo<Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>> || Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>::IsImplicitlyConvertibleTo<Unit>>>
+    bool operator==(const Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>& other) const {
+        using other_unit = Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>;
+
+        if constexpr (IsImplicitlyConvertibleTo<other_unit>) {
+            return ConverterTo<other_unit>::convert(count()) == other.count();
+        } else {
+            return typename other_unit::ConverterTo<Unit>::convert(other.count()) == count();
+        }
     }
 
     template<typename OTHER>

@@ -5,13 +5,15 @@
 namespace jb {
 namespace unit {
     
-namespace _base_units {
-    struct Gram;
+namespace base_units {
+struct Gram {
+    inline static const char* symbol = "g";
+};
 }
 
-using MilliGrams = Unit<_base_units::Gram, std::milli, int64_t>;
-using Grams = Unit<_base_units::Gram, std::ratio<1, 1>, int32_t>;
-using KiloGrams = Unit<_base_units::Gram, std::kilo, int32_t>;
+using MilliGrams = Unit<base_units::Gram, std::milli, int64_t>;
+using Grams = Unit<base_units::Gram, std::ratio<1, 1>, int32_t>;
+using KiloGrams = Unit<base_units::Gram, std::kilo, int32_t>;
 
 }
 }
