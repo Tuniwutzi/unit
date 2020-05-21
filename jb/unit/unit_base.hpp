@@ -57,6 +57,8 @@ Vergleich:
 template<typename BASE_UNIT, typename RATIO, typename REP>
 struct Unit {
 public:
+    using base_unit = BASE_UNIT;
+    using ratio = RATIO;
     using rep = REP;
 
 
