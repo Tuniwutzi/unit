@@ -54,7 +54,6 @@ Vergleich:
 
 */
 
-
 template<typename BASE_UNIT, typename RATIO, typename REP>
 struct Unit {
 public:
@@ -89,17 +88,12 @@ public:
         return to_unit(ConverterTo<to_unit>::convert(_count));
     }
 
-    template<typename OTHER_BASE_UNIT, typename OTHER_RATIO, typename OTHER_REP,
-             typename = std::enable_if_t<IsImplicitlyConvertibleTo<Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>> || Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>::IsImplicitlyConvertibleTo<Unit>>>
-    bool operator==(const Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>& other) const {
-        using other_unit = Unit<OTHER_BASE_UNIT, OTHER_RATIO, OTHER_REP>;
 
-        if constexpr (IsImplicitlyConvertibleTo<other_unit>) {
-            return ConverterTo<other_unit>::convert(count()) == other.count();
-        } else {
-            return typename other_unit::ConverterTo<Unit>::convert(other.count()) == count();
-        }
+    template<typename OTHER>
+    bool operator!=(const OTHER& other) const {
+        return !(*this == other);
     }
+
 
     template<typename OTHER>
     auto& operator+=(OTHER o) {
@@ -126,6 +120,23 @@ public:
 private:
     REP _count;
 };
+
+template<typename T>
+struct IsUnit : public std::false_type {};
+template<typename BASE_UNIT, typename RATIO, typename REP>
+struct IsUnit<Unit<BASE_UNIT, RATIO, REP>> : public std::true_type {};
+template<typename T>
+constexpr bool IsUnitV = IsUnit<T>::value;
+
+template<typename UNIT_A, typename UNIT_B,
+         typename = std::enable_if_t<IsUnitV<UNIT_A> && IsUnitV<UNIT_B> && (UNIT_A::IsImplicitlyConvertibleTo<UNIT_B> || UNIT_B::IsImplicitlyConvertibleTo<UNIT_A>)>>
+bool operator==(const UNIT_A& a, const UNIT_B& b) {
+    if constexpr (UNIT_A::IsImplicitlyConvertibleTo<UNIT_B>) {
+        return typename UNIT_A::ConverterTo<UNIT_B>::convert(a.count()) == b.count();
+    } else {
+        return a.count() == typename UNIT_B::ConverterTo<UNIT_A>::convert(b.count());
+    }
+}
 
 template<typename BASE_UNIT, typename RATIO_A, typename REP_A, typename RATIO_B, typename REP_B>
 auto operator+(const Unit<BASE_UNIT, RATIO_A, REP_A>& a, const Unit<BASE_UNIT, RATIO_B, REP_B>& b) {
@@ -156,14 +167,6 @@ auto operator-(const Unit<BASE_UNIT, RATIO_A, REP_A>& a, const Unit<BASE_UNIT, R
 
     }
 }
-
-template<typename UNIT, typename BASE_UNIT>
-struct IsBaseUnit : public std::false_type {};
-template<typename BASE_UNIT, typename RATIO, typename REP>
-struct IsBaseUnit<Unit<BASE_UNIT, RATIO, REP>, BASE_UNIT> : public std::true_type {};
-
-template<typename UNIT, typename BASE_UNIT>
-constexpr bool IsBaseUnitV = IsBaseUnit<UNIT, BASE_UNIT>::value;
 
 }
 
