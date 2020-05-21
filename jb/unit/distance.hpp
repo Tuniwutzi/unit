@@ -12,7 +12,7 @@ struct Meter {
 }
     
 using CentiMeters = Unit<base_units::Meter, std::centi, int32_t>;
-using Meters = Unit<base_units::Meter, std::ratio<1, 1>, int32_t>;
+using Meters = Unit<base_units::Meter, std::ratio<1>, int32_t>;
 using KiloMeters = Unit<base_units::Meter, std::kilo, int32_t>;
 
 }
