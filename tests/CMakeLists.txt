@@ -4,9 +4,11 @@ set(TARGET unit_tests)
 
 set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
 
+add_subdirectory(gtest)
+
 add_executable(
     ${TARGET}
     "${SRC}/main.cpp"
 )
 
-target_link_libraries(${TARGET} unit)
+target_link_libraries(${TARGET} unit gtest)

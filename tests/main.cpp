@@ -3,6 +3,8 @@
 
 #include <jb/unit.hpp>
 
+#include <gtest/gtest.h>
+
 #include <iostream>
 #include <sstream>
 
@@ -129,12 +131,16 @@ void addition() {
     // addsub(c, f);
 }
 
-int main() {
-    implicitConversions();
-    explicitConversions();
-    conversionBetweenBaseUnits();
-    comparisons();
-    addition();
+// int main() {
+//     implicitConversions();
+//     explicitConversions();
+//     conversionBetweenBaseUnits();
+//     comparisons();
+//     addition();
 
-    return 0;
+//     return 0;
+// }
+
+TEST(ASD, F) {
+    ASSERT_EQ(jb::unit::Meters(4), jb::unit::CentiMeters(400));
 }
