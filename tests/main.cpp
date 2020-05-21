@@ -1,4 +1,5 @@
 #include "stringification.hpp"
+#include "CompilitimeOperatorTests.hpp"
 
 #include <jb/unit.hpp>
 
@@ -16,14 +17,17 @@ const jb::unit::DegreeFarenheit f(100);
 
 
 void implicitConversions() {
+    using namespace jb::unit;
     jb::unit::Meters v(10);
 
     // Not allowed:
+    static_assert(!IsAssignmentValidV<Meters, Grams>, "Meters should not be assignable from grams");
     // v = cm;
     // v = g;
     // v = 5;
     
     // Allowed:
+    static_assert(IsAssignmentValidV<Meters, Meters>, "Meters should be assignable from meters");
     v = m;
     v = km;
 }
@@ -58,13 +62,18 @@ void conversionBetweenBaseUnits() {
     std::cout << std::endl;
 }
 
+
+
 void comparisons() {
+    using namespace jb::unit;
+    static_assert(!IsComparisonValidV<Meters, Grams>, "Meters should not be comparable to grams");
     // different units
     // m == g;
     // m == c;
     // m == f;
 
     // same units
+    static_assert(IsComparisonValidV<Meters, Meters>, "Meters should be comparable to meters");
     m == m;
     m == cm;
     cm == m;
@@ -89,6 +98,8 @@ void addsub(A a, B b) {
     }
 }
 void addition() {
+    using namespace jb::unit;
+
     jb::unit::CentiMeters cm(1000);
     jb::unit::Meters m(1000);
     jb::unit::KiloMeters km(1000);
@@ -96,6 +107,8 @@ void addition() {
     jb::unit::Grams g(10);
     jb::unit::DegreeCelsius c(10);
     jb::unit::DegreeFarenheit f(10);
+
+    static_assert(IsAdditionValidV<Meters, CentiMeters>, "Meters should be addable to centimeters");
 
     addsub(m, m);
     addsub(cm, cm);
@@ -105,6 +118,8 @@ void addition() {
     addsub(m, km);
     addsub(km, cm);
 
+
+    static_assert(!IsAdditionValidV<Meters, Grams>, "Meters should not be addable to grams");
     // completely different units
     // addsub(g, m);
     // addsub(g, f);
