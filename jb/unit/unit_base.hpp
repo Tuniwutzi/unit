@@ -5,54 +5,7 @@
 #include <ratio>
 
 namespace jb {
-
 namespace unit {
-
-
-/*
-
-Def.:
-Einheit = BASE_UNIT
-Selbe Einheit = IsConvertableTo<BASE_UNIT, OTHER_BASE_UNIT>
-Andere Einheit = !IsConvertableTo<BASE_UNIT, OTHER_BASE_UNIT>
-
-Zuweisung:
-    Selbe Einheit:
-        Wenn Genauigkeitsverlust: explizit
-        Sonst: implizit
-    Andere Einheit:
-        /
-    Arithmetic:
-        /
-
-Vergleich:
-    Selbe Einheit:
-        Immer
-    Andere Einheit:
-        /
-    Arithmetic:
-        /
-    
-+, -:
-    Selbe Einheit:
-        Nur wenn BASE_UNIT == BASE_UNIT, gibt genauere von beiden UnitRepresentations zurück (die mit der kleineren ratio)
-            Grund: Selbst wenn es implizit konvertierbar ist kann der 0-punkt woanders liegen (Fahrenheit und Celsius bspw.) => die zu addieren ist Interpretationssache
-    Andere Einheit:
-        /
-    Arithmetic:
-        /
-
-*, /:
-    Selbe Einheit:
-        / (Sonderfall für Meter*Meter = Quadratmeter? Und Quadratmeter/Meter = Meter? Falls es andere Einheiten mit solchem Verhalten gibt kann man es formalisieren und in der Einheit compile-time-flags hinterlegen was erlaubt ist)
-    Andere Einheit:
-        / (Sonderfall für Relationseinheiten; wenn wir bspw. MetersPerSecond implementieren sollte das (m/s)*s möglich sein - ergibt wieder meter. Auch das eventuell formalisieren, falls wir Geteilt-Operatoren für verschiedene Einheiten formalisieren [= man kann beliebige Einheiten in Verhältnis stellen])
-    Arithmetic:
-        Immer, gibt selbe Representation zurück
-        Problem: was wenn bei Division eine Kommazahl rauskommt?
-            => selbes Verhalten wir wenn ich int(5) / 2 rechne => truncate! Wenn ich Meters(5) / 2 rechne bekomme ich Meters(2) raus. Falls ich die Genauigkeit haben will kann ich DeciMeters(50) / 2 rechnen.
-
-*/
 
 template<typename BASE_UNIT, typename RATIO, typename REP>
 struct Unit {
@@ -131,5 +84,4 @@ template<typename T>
 constexpr bool IsUnitV = IsUnit<T>::value;
 
 }
-
 }
