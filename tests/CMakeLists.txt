@@ -8,7 +8,7 @@ add_subdirectory(gtest)
 
 add_executable(
     ${TARGET}
-    "${SRC}/main.cpp"
+    "${SRC}/UnitBaseTests.cpp"
 )
 
 target_link_libraries(${TARGET} unit gtest)

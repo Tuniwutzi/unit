@@ -39,6 +39,15 @@ constexpr bool IsAssignmentValidV = IsFunctorValidV<AssignmentTest<A, B>>;
 
 
 template<typename A, typename B>
+struct CastTest {
+    template<typename T = decltype(static_cast<A>(std::declval<B>()))>
+    using type = T;
+};
+template<typename TO, typename FROM>
+constexpr bool IsCastValidV = IsFunctorValidV<CastTest<TO, FROM>>;
+
+
+template<typename A, typename B>
 struct AdditionTest {
     template<typename T = decltype(std::declval<A>() + std::declval<B>())>
     using type = T;
