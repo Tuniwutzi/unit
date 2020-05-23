@@ -37,11 +37,6 @@ struct UnitConverter<Unit<BASE_UNIT, FROM_RATIO, FROM_REP>, Unit<BASE_UNIT, TO_R
     }
 };
 
-// template<typename FROM_UNIT, typename TO_UNIT>
-// using IsConvertibleV = UnitConverter<FROM_UNIT, TO_UNIT>::IsConvertible;
-
-// template<typename FROM_UNIT, typename TO_UNIT>
-// using LosesPrecisionV = UnitConverter<FROM_UNIT, TO_UNIT>::LosesPrecision;
 
 }
 }

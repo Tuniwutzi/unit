@@ -27,7 +27,7 @@ public:
     using target_converter = UnitConverter<DegreeFarenheit, to_unit>;
 
     static constexpr bool IsConvertible = true;
-    static constexpr bool LosesPrecision = normalizing_converter::LosesPrecision || target_converter::LosesPrecision;
+    static constexpr bool LosesPrecision = true; // force explicit casts for conversion between base units
 
     static constexpr TO_REP convert(FROM_REP from) {
         // convert whichever ratio was used to represent the parameter into 1/1 ratio
@@ -50,7 +50,7 @@ public:
     using target_converter = UnitConverter<DegreeCelsius, to_unit>;
 
     static constexpr bool IsConvertible = true;
-    static constexpr bool LosesPrecision = normalizing_converter::LosesPrecision || target_converter::LosesPrecision;
+    static constexpr bool LosesPrecision = true; // force explicit casts for conversion between base units
     
     static constexpr TO_REP convert(FROM_REP from) {
         auto fahrenheit = normalizing_converter::convert(from);
