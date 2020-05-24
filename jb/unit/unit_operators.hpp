@@ -79,9 +79,9 @@ template<typename TYPE_A, typename TYPE_B,
          typename = std::enable_if_t<(IsUnitV<TYPE_A> && std::is_arithmetic_v<TYPE_B>) || std::is_arithmetic_v<TYPE_A> && IsUnitV<TYPE_B>>>
 auto operator*(const TYPE_A& a, const TYPE_B& b) {
     if constexpr (IsUnitV<TYPE_A>) {
-        return a.count() * b;
+        return TYPE_A(a.count() * b);
     } else {
-        return a * b.count();
+        return TYPE_B(a * b.count());
      }
 }
 
@@ -93,7 +93,7 @@ auto operator*(const TYPE_A& a, const TYPE_B& b) {
 template<typename TYPE_A, typename TYPE_B,
          typename = std::enable_if_t<(IsUnitV<TYPE_A> && std::is_arithmetic_v<TYPE_B>)>>
 auto operator/(const TYPE_A& a, const TYPE_B& b) {
-    return a.count() / b;
+    return TYPE_A(a.count() / b);
 }
 
 
