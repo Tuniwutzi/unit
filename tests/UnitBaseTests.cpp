@@ -3,7 +3,7 @@
 #include "TestUnits.hpp"
 #include "CompilitimeOperatorTests.hpp"
 
-TEST(UnitBase, Count)
+TEST(UnitBaseTests, Count)
 {
     UnitB_m bm(5);
     UnitB b(5000);
@@ -14,7 +14,7 @@ TEST(UnitBase, Count)
     ASSERT_EQ(bk.count(), 5000000);
 }
 
-TEST(UnitBase, ImplicitConversions_SameBase_CT)
+TEST(UnitBaseTests, ImplicitConversions_SameBase_CT)
 {
     ASSERT_TRUE((IsAssignmentValidV<UnitB_m, UnitB_m>));
     ASSERT_TRUE((IsAssignmentValidV<UnitB_m, UnitB>));
@@ -29,7 +29,7 @@ TEST(UnitBase, ImplicitConversions_SameBase_CT)
     ASSERT_TRUE((IsAssignmentValidV<UnitB_k, UnitB_k>));
 }
 
-TEST(UnitBase, ImplicitConversions_SameBase_RT)
+TEST(UnitBaseTests, ImplicitConversions_SameBase_RT)
 {
     UnitB_m bm(9);
     UnitB b(9);
@@ -51,7 +51,7 @@ TEST(UnitBase, ImplicitConversions_SameBase_RT)
     ASSERT_EQ(bk.count(), 15);
 }
 
-TEST(UnitBase, ImplicitConversions_DifferentBase_CT)
+TEST(UnitBaseTests, ImplicitConversions_DifferentBase_CT)
 {
     ASSERT_FALSE((IsAssignmentValidV<UnitA1_m, UnitA2_m>));
     ASSERT_FALSE((IsAssignmentValidV<UnitA1_m, UnitA2>));
@@ -78,12 +78,12 @@ TEST(UnitBase, ImplicitConversions_DifferentBase_CT)
     ASSERT_FALSE((IsAssignmentValidV<UnitA2_k, UnitA1_k>));
 }
 
-TEST(UnitBase, ImplicitConversions_DifferentBase_RT)
+TEST(UnitBaseTests, ImplicitConversions_DifferentBase_RT)
 {
     // no implicit conversions allowed by the UnitConverter
 }
 
-TEST(UnitBase, ExplicitConversions_SameBase_CT)
+TEST(UnitBaseTests, ExplicitConversions_SameBase_CT)
 {
     ASSERT_TRUE((IsCastValidV<UnitB_m, UnitB_m>));
     ASSERT_TRUE((IsCastValidV<UnitB_m, UnitB>));
@@ -98,7 +98,7 @@ TEST(UnitBase, ExplicitConversions_SameBase_CT)
     ASSERT_TRUE((IsCastValidV<UnitB_k, UnitB_k>));
 }
 
-TEST(UnitBase, ExplicitConversions_SameBase_RT)
+TEST(UnitBaseTests, ExplicitConversions_SameBase_RT)
 {
     UnitB b(9);
     UnitB_k bk(9);
@@ -112,7 +112,7 @@ TEST(UnitBase, ExplicitConversions_SameBase_RT)
     ASSERT_EQ(b.count(), 15);
 }
 
-TEST(UnitBase, ExplicitConversions_DifferentBase_CT)
+TEST(UnitBaseTests, ExplicitConversions_DifferentBase_CT)
 {
     ASSERT_TRUE((IsCastValidV<UnitA1_m, UnitA2_m>));
     ASSERT_TRUE((IsCastValidV<UnitA1_m, UnitA2>));
@@ -139,7 +139,7 @@ TEST(UnitBase, ExplicitConversions_DifferentBase_CT)
     ASSERT_TRUE((IsCastValidV<UnitA2_k, UnitA1_k>));
 }
 
-TEST(UnitBase, ExplicitConversions_DifferentBase_RT)
+TEST(UnitBaseTests, ExplicitConversions_DifferentBase_RT)
 {
     UnitA1 a1(9);
     UnitA2 a2(9);
