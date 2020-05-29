@@ -54,6 +54,8 @@ const std::pair<std::string, bool>& ratioString() {
             rv = "c";
         } else if constexpr (std::is_same_v<RATIO, std::kilo>) {
             rv = "k";
+        } else if constexpr (std::is_same_v<RATIO, std::mega>) {
+            rv = "M";
         }
 
         if (!rv.empty()) {
@@ -89,10 +91,7 @@ const std::pair<std::string, bool>& ratioString() {
 
 template<typename BASE_UNIT>
 const std::string& baseUnitString() {
-    static const auto rv = []() -> std::string {
-        // using jb::unit::base_units;
-        return BASE_UNIT::symbol;
-    }();
+    static const std::string rv = BASE_UNIT::symbol;
 
     return rv;
 }
