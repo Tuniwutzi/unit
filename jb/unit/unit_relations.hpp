@@ -5,12 +5,16 @@
 namespace jb {
 namespace unit {
 
+// Valid Inverse: contains a base unit, no other relations
+// Valid Product: only contains inverses and base units
 
-// Every expression is expected to be normalized.
-// A normalized expression has one of these forms:
-// 1. Product<E1, ..., En> where each Ei is a Base Unit or the Inverse of a Base Unit
-// 2. B where B is a Base Unit
-// 3. Inverse<B> where B is a Base Unit
+// Trivial Product: a valid product that contains one or zero elements
+// Ordered Product: a valid product with base units first and inverses later, as in Product<N1, N2, ..., Nn, Inverse<D1>, Inverse<D2>, ..., Inverse<Dd>>
+// Normalized Product: an ordered, non-trivial product
+
+// Expression: Anything that can be used as a base unit in the Unit-template, so either relations or base units
+// Normalized Expression: an expression that is either void, a normalized product, a valid Inverse, or a base unit
+
 
 
 template<typename... FACTORS>
@@ -31,35 +35,118 @@ struct IsInverse<Inverse<BASE_UNIT>> : public std::true_type {};
 template<typename T>
 constexpr bool IsInverseV = IsInverse<T>::value;
 
-template<typename... FACTORS>
-struct Product {
-    template<typename... FACTORS>
-    struct IsNormalized;
+namespace _helpers {
+    template<typename A, typename B>
+    struct ConcatFactors {
+        private:
+            template<typename LEFT>
+            struct ConcatHelper {
+                template<typename RIGHT>
+                struct Append;
+                
+                template<typename... RIGHT_ELEMENTS>
+                struct Append<Product<RIGHT_ELEMENTS...>> {
+                    using type = Product<LEFT, RIGHT_ELEMENTS...>;
+                };
+                template<typename RIGHT>
+                struct Append {
+                    using type = Product<LEFT, RIGHT>;
+                };
+            };
+            template<typename... LEFT_ELEMENTS>
+            struct ConcatHelper<Product<LEFT_ELEMENTS...>> {
+                template<typename RIGHT>
+                struct Append {
+                    using type = Product<LEFT_ELEMENTS..., RIGHT>;
+                };
+                template<typename... RIGHT_ELEMENTS>
+                struct Append<Product<RIGHT_ELEMENTS...>> {
+                    using type = Product<LEFT_ELEMENTS..., RIGHT_ELEMENTS...>;
+                };
+            };
+        public:
+            using type = typename ConcatHelper<A>::template Append<B>::type;
+    };
+    
+    template<typename A, typename B>
+    using ConcatFactorsT = typename ConcatFactors<A, B>::type;
+
+    template<typename PRODUCT, typename FACTOR>
+    struct ContainsFactor;
+    template<typename NEEDLE, typename FIRST, typename... REST>
+    struct ContainsFactor<Product<FIRST, REST...>, NEEDLE> {
+        static const bool value = std::is_same_v<NEEDLE, FIRST> || ContainsFactor<Product<REST...>, NEEDLE>::value;
+    };
+    template<typename NEEDLE>
+    struct ContainsFactor<Product<>, NEEDLE> {
+        static const bool value = false;
+    };
+    template<typename PRODUCT, typename FACTOR>
+    constexpr bool ContainsFactorV = ContainsFactor<PRODUCT, FACTOR>::value;
+
+    template<typename PRODUCT>
+    struct DistinctFactors;
     template<typename FIRST, typename... REST>
-    struct IsNormalized<FIRST, REST...> {
-        static constexpr bool value = !IsProductV<FIRST> && IsNormalized<REST...>::value;
+    struct DistinctFactors<Product<FIRST, REST...>> {
+        using type = std::conditional_t<
+            ContainsFactorV<Product<REST...>, FIRST>,
+            typename DistinctFactors<Product<REST...>>::type,
+            typename ConcatFactorsT<FIRST, typename DistinctFactors<Product<REST...>>::type>
+        >;
     };
     template<>
-    struct IsNormalized<> {
+    struct DistinctFactors<Product<>> {
+        using type = Product<>;
+    };
+    template<typename PRODUCT>
+    using DistinctFactorsT = typename DistinctFactors<PRODUCT>::type;
+}
+
+template<typename... FACTORS>
+struct Product {
+private:
+    template<typename... FACTORS>
+    struct IsValid;
+    template<typename FIRST, typename... REST>
+    struct IsValid<FIRST, REST...> {
+        static constexpr bool value = !IsProductV<FIRST> && IsValid<REST...>::value;
+    };
+    template<>
+    struct IsValid<> {
         static constexpr bool value = true;
     };
-    static_assert(IsNormalized<FACTORS...>::value, "Product must not contain more products");
+    static_assert(IsValid<FACTORS...>::value, "Product is not valid: must not contain more products");
+
+    
+    template<typename PRODUCT>
+    struct NumDenSplit;
+    template<typename FIRST, typename... REST>
+    struct NumDenSplit<Product<FIRST, REST...>> {
+        using numerators = _helpers::ConcatFactorsT<FIRST, typename NumDenSplit<Product<REST...>>::numerators>;
+        using denominators = typename NumDenSplit<Product<REST...>>::denominators;
+    };
+    template<typename FIRST, typename... REST>
+    struct NumDenSplit<Product<Inverse<FIRST>, REST...>> {
+        using numerators = typename NumDenSplit<Product<REST...>>::numerators;
+        using denominators = _helpers::ConcatFactorsT<Inverse<FIRST>, typename NumDenSplit<Product<REST...>>::denominators>;
+    };
+    template<>
+    struct NumDenSplit<Product<>> {
+        using numerators = Product<>;
+        using denominators = Product<>;
+    };
+
+public:
+    using numerators = typename NumDenSplit<Product<FACTORS...>>::numerators;
+    using denominators = typename NumDenSplit<Product<FACTORS...>>::denominators;
+    using distinct = typename _helpers::DistinctFactorsT<Product<FACTORS...>>;
+    static constexpr size_t size = sizeof...(FACTORS);
 };
 
 template<typename B>
 struct Inverse {
-    static_assert(!IsProductV<B> && !IsInverseV<B>, "B must be a base unit");
+    static_assert(!IsProductV<B> && !IsInverseV<B>, "Inverse is not valid: B must be a base unit");
 };
-
-
-namespace _helpers {
-    template<typename PRODUCT, typename FACTOR>
-    struct Prepend;
-    template<typename NEW, typename... EXISTING>
-    struct Prepend<Product<EXISTING...>, NEW> {
-        using type = Product<NEW, EXISTING...>;
-    };
-}
 
 
 /*
@@ -83,13 +170,19 @@ struct Invert {
     using type = Inverse<E>;
 };
 namespace _helpers {
+    template<typename PRODUCT>
+    struct OrderProduct {
+        using type = ConcatFactorsT<typename PRODUCT::numerators, typename PRODUCT::denominators>;
+    };
+
+
     template<typename NEW_FACTOR, typename... REST>
     struct AddFactor;
     template<typename FACTOR, typename FIRST, typename... REST>
     struct AddFactor<FACTOR, FIRST, REST...> {
         using reducible = typename Invert<FACTOR>::type;
 
-        using type = std::conditional_t<std::is_same_v<reducible, FIRST>, Product<REST...>, typename Prepend<typename AddFactor<FACTOR, REST...>::type, FIRST>::type>;
+        using type = std::conditional_t<std::is_same_v<reducible, FIRST>, Product<REST...>, ConcatFactorsT<typename AddFactor<FACTOR, REST...>::type, FIRST>>;
     };
     template<typename FACTOR>
     struct AddFactor<FACTOR> {
@@ -130,6 +223,23 @@ namespace _helpers {
     };
     template<typename PRODUCT>
     using UnpackProductT = typename UnpackProduct<PRODUCT>::type;
+
+
+    template<typename EXPRESSION>
+    struct NormalizedExpresseion;
+    // base unit, inverse or void:
+    template<typename BASE_UNIT>
+    struct NormalizedExpression {
+        using type = BASE_UNIT;
+    };
+    // product:
+    template<typename... FACTORS>
+    struct NormalizedExpression<Product<FACTORS...>> {
+        using type = typename UnpackProduct<typename OrderProduct<Product<FACTORS...>>::type>::type;
+    };
+    
+    template<typename EXPRESSION>
+    using NormalizedExpresseionT = typename NormalizedExpression<EXPRESSION>::type;
 }
 template<typename A, typename B>
 struct Multiply {
@@ -144,7 +254,7 @@ struct Multiply {
     */
 
     static_assert(IsProductV<A> == IsProductV<B>, "Wrong overload called for P * B or B * P");
-    using type = _helpers::UnpackProductT<typename _helpers::AddFactors<A, B>::type>;
+    using type = _helpers::NormalizedExpresseionT<typename _helpers::AddFactors<A, B>::type>;
 };
 template<typename B, typename... FACTORS>
 struct Multiply<Product<FACTORS...>, B> {
@@ -153,7 +263,7 @@ struct Multiply<Product<FACTORS...>, B> {
     P * I
     */
     
-    using type = _helpers::UnpackProductT<typename _helpers::AddFactor<B, FACTORS...>::type>;
+    using type = _helpers::NormalizedExpresseionT<typename _helpers::AddFactor<B, FACTORS...>::type>;
 };
 template<typename A, typename... FACTORS>
 struct Multiply<A, Product<FACTORS...>> {
@@ -174,16 +284,9 @@ struct Invert<Inverse<E>> {
 };
 template<typename... FACTORS>
 struct Invert<Product<FACTORS...>> {
-    template<typename PRODUCT, typename FACTOR>
-    struct Prepend;
-    template<typename NEW, typename... EXISTING>
-    struct Prepend<Product<EXISTING...>, NEW> {
-        using type = Product<NEW, EXISTING...>;
-    };
-
     template<typename FIRST, typename... REST>
     struct InvertFactors {
-        using type = typename _helpers::Prepend<typename InvertFactors<REST...>::type, typename Invert<FIRST>::type>::type;
+        using type = _helpers::ConcatFactorsT<typename InvertFactors<REST...>::type, typename Invert<FIRST>::type>;
     };
     template<typename LAST>
     struct InvertFactors<LAST> {
