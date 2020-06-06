@@ -4,9 +4,15 @@
 
 using namespace jb::unit;
 
-class BaseUnitA1;
-class BaseUnitA2;
-class BaseUnitB;
+struct BaseUnitA1 {
+    static inline const char* symbol = "A1";
+};
+struct BaseUnitA2 {
+    static inline const char* symbol = "A2";
+};
+struct BaseUnitB {
+    static inline const char* symbol = "B";
+};
 
 using UnitA1_m = Unit<BaseUnitA1, std::milli, int>;
 using UnitA1 = Unit<BaseUnitA1, std::ratio<1>, int>;
