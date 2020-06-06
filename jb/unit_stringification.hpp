@@ -108,6 +108,91 @@ const std::string& baseUnitString(BASE_UNIT) {
     return rv;
 }
 
+template<typename... FACTORS>
+const std::string& baseUnitString(Product<FACTORS...>);
+template<typename T>
+const std::string& baseUnitString(Inverse<T>);
+
+namespace {
+template<typename... FACTORS>
+struct ProductString;
+template<typename FIRST, typename... REST>
+struct ProductString<FIRST, REST...> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
+        numerators.push_back(baseUnitString(FIRST()));
+        ProductString<REST...>::append(numerators, denominators);
+    }
+};
+template<typename FIRST, typename... REST>
+struct ProductString<Inverse<FIRST>, REST...> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
+        denominators.push_back(baseUnitString(FIRST()));
+        ProductString<REST...>::append(numerators, denominators);
+    }
+};
+template<>
+struct ProductString<> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denomiators) {
+    }
+};
+}
+
+template<typename... FACTORS>
+const std::string& baseUnitString(Product<FACTORS...>) {
+    static const std::string rv = []() {
+        std::vector<std::reference_wrapper<const std::string>> numerators, denominators;
+
+        ProductString<FACTORS...>::append(numerators, denominators);
+
+        std::string rv;
+
+        if (!numerators.empty()) {
+            bool first = true;
+            for (auto& str : numerators) {
+                if (first) {
+                    first = false;
+                } else {
+                    rv += "*";
+                }
+
+                rv += str.get();
+            }
+        } else {
+            rv = "1";
+        }
+
+        if (!denominators.empty()) {
+            rv += "/(";
+
+            bool first = true;
+            for (auto& str : denominators) {
+                if (first) {
+                    first = false;
+                } else {
+                    rv += "*";
+                }
+
+                rv += str.get();
+            }
+
+            rv += ")";
+        }
+
+        return rv;
+    }();
+    return rv; 
+};
+template<typename T>
+const std::string& baseUnitString(Inverse<T>) {
+    static const std::string rv = []() {
+        return "(1/" + baseUnitString(T()) + ")";
+    }();
+    return rv;
+}
+
 }
 }
 }
