@@ -14,6 +14,7 @@ add_executable(
     "${SRC}/UnitSubtractionTests.cpp"
     "${SRC}/UnitMultiplicationTests.cpp"
     "${SRC}/UnitDivisionTests.cpp"
+    "${SRC}/UnitStringificationTests.cpp"
 )
 
 target_link_libraries(${TARGET} unit gtest)
