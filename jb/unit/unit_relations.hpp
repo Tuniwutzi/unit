@@ -16,7 +16,9 @@ namespace unit {
 // Normalized Expression: an expression that is either void, a normalized product, a valid Inverse, or a base unit
 
 
-
+/*
+Representation of a valid product
+*/
 template<typename... FACTORS>
 struct Product;
 template<typename T>
@@ -26,6 +28,9 @@ struct IsProduct<Product<FACTORS...>> : public std::true_type {};
 template<typename T>
 constexpr bool IsProductV = IsProduct<T>::value;
 
+/*
+Representation of a valid inverse
+*/
 template<typename T>
 struct Inverse;
 template<typename T>
@@ -148,26 +153,19 @@ struct Inverse {
     static_assert(!IsProductV<B> && !IsInverseV<B>, "Inverse is not valid: B must be a base unit");
 };
 
-
 /*
-Cases for multiplication:
-B1 * B2
-
-I(B1) * B2
-B1 * I(B2)
-I(B1) * I(B2)
-
-P * B
-P * I
-B * P
-I * P
-P1 * P2
+Expects two normalized expressions as template arguments
+The type definition contains a normalized a normalized expression that represents the result of the multiplication
 */
-template<typename A, typename B>
+template<typename NORMALIZED_EXPRESSION_A, typename NORMALIZED_EXPRESSION_B>
 struct Multiply;
-template<typename E>
+/*
+Expects a normalized expression as the template argument
+The type definition contains a normalized expression representing the result of the inversion
+*/
+template<typename NORMALIZED_EXPRESSION>
 struct Invert {
-    using type = Inverse<E>;
+    using type = Inverse<NORMALIZED_EXPRESSION>;
 };
 namespace _helpers {
     template<typename PRODUCT>
@@ -226,7 +224,7 @@ namespace _helpers {
 
 
     template<typename EXPRESSION>
-    struct NormalizedExpresseion;
+    struct NormalizedExpression;
     // base unit, inverse or void:
     template<typename BASE_UNIT>
     struct NormalizedExpression {
@@ -239,7 +237,7 @@ namespace _helpers {
     };
     
     template<typename EXPRESSION>
-    using NormalizedExpresseionT = typename NormalizedExpression<EXPRESSION>::type;
+    using NormalizedExpressionT = typename NormalizedExpression<EXPRESSION>::type;
 }
 template<typename A, typename B>
 struct Multiply {
@@ -254,7 +252,7 @@ struct Multiply {
     */
 
     static_assert(IsProductV<A> == IsProductV<B>, "Wrong overload called for P * B or B * P");
-    using type = _helpers::NormalizedExpresseionT<typename _helpers::AddFactors<A, B>::type>;
+    using type = _helpers::NormalizedExpressionT<typename _helpers::AddFactors<A, B>::type>;
 };
 template<typename B, typename... FACTORS>
 struct Multiply<Product<FACTORS...>, B> {
@@ -263,7 +261,7 @@ struct Multiply<Product<FACTORS...>, B> {
     P * I
     */
     
-    using type = _helpers::NormalizedExpresseionT<typename _helpers::AddFactor<B, FACTORS...>::type>;
+    using type = _helpers::NormalizedExpressionT<typename _helpers::AddFactor<B, FACTORS...>::type>;
 };
 template<typename A, typename... FACTORS>
 struct Multiply<A, Product<FACTORS...>> {
@@ -298,6 +296,10 @@ template<typename E>
 using InvertT = typename Invert<E>::type;
 
 
+/*
+Expects two normalized expressions as template arguments
+The type definition contains the result of the division
+*/
 template<typename NUM, typename DEN>
 struct Divide {
     using type = MultiplyT<NUM, InvertT<DEN>>;
