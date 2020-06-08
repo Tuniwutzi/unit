@@ -38,7 +38,7 @@ template<typename UNIT_A, typename UNIT_B,
          typename = std::enable_if_t<_helpers::IsValidResultV<MultiplyT<typename UNIT_A::base_unit, typename UNIT_B::base_unit>>>>
 auto operator*(UNIT_A a, UNIT_B b) {
     using base_unit_result = MultiplyT<typename UNIT_A::base_unit, typename UNIT_B::base_unit>;
-    using ratio_result = typename std::ratio_divide<typename UNIT_A::ratio, typename UNIT_B::ratio>::type;
+    using ratio_result = typename std::ratio_multiply<typename UNIT_A::ratio, typename UNIT_B::ratio>::type;
 
     auto result = a.count() * b.count();
     if constexpr (std::is_same_v<base_unit_result, void>) {
