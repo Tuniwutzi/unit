@@ -165,7 +165,11 @@ const std::string& baseUnitString(Product<FACTORS...>) {
         }
 
         if (!denominators.empty()) {
-            rv += "/(";
+            rv += "/";
+
+            if (denominators.size() > 1) {
+                rv += "(";
+            }
 
             bool first = true;
             for (auto& str : denominators) {
@@ -178,7 +182,10 @@ const std::string& baseUnitString(Product<FACTORS...>) {
                 rv += str.get();
             }
 
-            rv += ")";
+
+            if (denominators.size() > 1) {
+                rv += ")";
+            }
         }
 
         return rv;
