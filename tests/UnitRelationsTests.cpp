@@ -9,6 +9,7 @@
 
 
 using namespace jb::unit;
+using namespace jb::unit::relations;
 
 
 using BaseUnitA1ByA2 = Product<BaseUnitA1, Inverse<BaseUnitA2>>;

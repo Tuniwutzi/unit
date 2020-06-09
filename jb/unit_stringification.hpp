@@ -109,9 +109,9 @@ const std::string& baseUnitString(BASE_UNIT) {
 }
 
 template<typename... FACTORS>
-const std::string& baseUnitString(Product<FACTORS...>);
+const std::string& baseUnitString(relations::Product<FACTORS...>);
 template<typename T>
-const std::string& baseUnitString(Inverse<T>);
+const std::string& baseUnitString(relations::Inverse<T>);
 
 namespace {
 template<typename... FACTORS>
@@ -125,7 +125,7 @@ struct ProductString<FIRST, REST...> {
     }
 };
 template<typename FIRST, typename... REST>
-struct ProductString<Inverse<FIRST>, REST...> {
+struct ProductString<relations::Inverse<FIRST>, REST...> {
     template<typename BUFFER_TYPE>
     static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
         denominators.push_back(baseUnitString(FIRST()));
@@ -141,7 +141,7 @@ struct ProductString<> {
 }
 
 template<typename... FACTORS>
-const std::string& baseUnitString(Product<FACTORS...>) {
+const std::string& baseUnitString(relations::Product<FACTORS...>) {
     static const std::string rv = []() {
         std::vector<std::reference_wrapper<const std::string>> numerators, denominators;
 
@@ -193,7 +193,7 @@ const std::string& baseUnitString(Product<FACTORS...>) {
     return rv; 
 };
 template<typename T>
-const std::string& baseUnitString(Inverse<T>) {
+const std::string& baseUnitString(relations::Inverse<T>) {
     static const std::string rv = []() {
         return "(1/" + baseUnitString(T()) + ")";
     }();

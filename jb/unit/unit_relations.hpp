@@ -4,6 +4,7 @@
 
 namespace jb {
 namespace unit {
+namespace relations {
 
 // Valid Inverse: contains a base unit, no other relations
 // Valid Product: only contains inverses and base units
@@ -307,6 +308,6 @@ struct Divide {
 template<typename NUM, typename DEN>
 using DivideT = typename Divide<NUM, DEN>::type;
 
-
+}
 }
 }
