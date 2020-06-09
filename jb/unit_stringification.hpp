@@ -120,7 +120,7 @@ template<typename FIRST, typename... REST>
 struct ProductString<FIRST, REST...> {
     template<typename BUFFER_TYPE>
     static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
-        numerators.push_back(baseUnitString(FIRST()));
+        numerators[baseUnitString(FIRST())]++;
         ProductString<REST...>::append(numerators, denominators);
     }
 };
@@ -128,7 +128,7 @@ template<typename FIRST, typename... REST>
 struct ProductString<relations::Inverse<FIRST>, REST...> {
     template<typename BUFFER_TYPE>
     static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
-        denominators.push_back(baseUnitString(FIRST()));
+        denominators[baseUnitString(FIRST())]++;
         ProductString<REST...>::append(numerators, denominators);
     }
 };
@@ -143,52 +143,52 @@ struct ProductString<> {
 template<typename... FACTORS>
 const std::string& baseUnitString(relations::Product<FACTORS...>) {
     static const std::string rv = []() {
-        std::vector<std::reference_wrapper<const std::string>> numerators, denominators;
+        std::map<std::string, size_t> numerators, denominators;
+        auto stringify = [](const auto& map) {
+            std::stringstream rv;
 
-        ProductString<FACTORS...>::append(numerators, denominators);
+            if (map.size() > 1) {
+                rv << "(";
+            }
 
-        std::string rv;
-
-        if (!numerators.empty()) {
             bool first = true;
-            for (auto& str : numerators) {
+            for (const auto& [string, power] : map) {
                 if (first) {
                     first = false;
                 } else {
-                    rv += "*";
+                    rv << "*";
                 }
 
-                rv += str.get();
+                rv << string;
+                if (power > 1) {
+                    rv << "^" << power;
+                }
             }
+
+            if (map.size() > 1) {
+                rv << ")";
+            }
+
+            return rv.str();
+        };
+
+        ProductString<FACTORS...>::append(numerators, denominators);
+
+        std::string rv = "(";
+
+        if (!numerators.empty()) {
+            rv += stringify(numerators);
         } else {
-            rv = "1";
+            rv += "1";
         }
 
         if (!denominators.empty()) {
             rv += "/";
 
-            if (denominators.size() > 1) {
-                rv += "(";
-            }
-
-            bool first = true;
-            for (auto& str : denominators) {
-                if (first) {
-                    first = false;
-                } else {
-                    rv += "*";
-                }
-
-                rv += str.get();
-            }
-
-
-            if (denominators.size() > 1) {
-                rv += ")";
-            }
+            rv += stringify(denominators);
         }
 
-        return rv;
+        return rv + ")";
     }();
     return rv; 
 };

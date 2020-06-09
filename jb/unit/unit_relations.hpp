@@ -193,17 +193,21 @@ namespace _helpers {
     struct AddFactors {
         using type = typename AddFactor<F1, F2>::type;
     };
-    template<typename F1, typename FIRST, typename... REST>
-    struct AddFactors<F1, Product<FIRST, REST...>> {
-        using type = typename Multiply<typename Multiply<F1, FIRST>::type, Product<REST...>>::type;
+    template<typename... LEFT, typename FIRST, typename... REST>
+    struct AddFactors<Product<LEFT...>, Product<FIRST, REST...>> {
+        using type = typename Multiply<typename Multiply<Product<LEFT...>, FIRST>::type, Product<REST...>>::type;
     };
-    template<typename F1>
-    struct AddFactors<F1, Product<>> {
-        using type = F1;
+    template<typename... LEFT>
+    struct AddFactors<Product<LEFT...>, Product<>> {
+        using type = Product<LEFT...>;
     };
     template<typename F2, typename... F1>
     struct AddFactors<Product<F1...>, F2> {
-        using type = typename AddFactors<F2, Product<F1...>>::type;
+        using type = typename AddFactor<F2, F1...>::type;
+    };
+    template<typename F2, typename... F1>
+    struct AddFactors<F2, Product<F1...>> {
+        using type = typename AddFactor<F2, F1...>::type;
     };
 
     template<typename PRODUCT>
@@ -248,11 +252,8 @@ struct Multiply {
     I(B1) * B2
     B1 * I(B2)
     I(B1) * I(B2)
-    
-    P1 * P2
     */
-
-    static_assert(IsProductV<A> == IsProductV<B>, "Wrong overload called for P * B or B * P");
+   
     using type = _helpers::NormalizedExpressionT<typename _helpers::AddFactors<A, B>::type>;
 };
 template<typename B, typename... FACTORS>
@@ -272,6 +273,14 @@ struct Multiply<A, Product<FACTORS...>> {
     */
     using type = typename Multiply<Product<FACTORS...>, A>::type;
 };
+template<typename... FACTORS_LEFT, typename... FACTORS_RIGHT>
+struct Multiply<Product<FACTORS_LEFT...>, Product<FACTORS_RIGHT...>> {
+    /*
+    B * P
+    I * P
+    */
+    using type = _helpers::NormalizedExpressionT<typename _helpers::AddFactors<Product<FACTORS_LEFT...>, Product<FACTORS_RIGHT...>>::type>;
+};
 template<typename A, typename B>
 using MultiplyT = typename Multiply<A, B>::type;
 
@@ -289,9 +298,9 @@ struct Invert<Product<FACTORS...>> {
     };
     template<typename LAST>
     struct InvertFactors<LAST> {
-        using type = Product<LAST>;
+        using type = Product<typename Invert<LAST>::type>;
     };
-    using type = Inverse<typename InvertFactors<FACTORS...>::type>;
+    using type = typename InvertFactors<FACTORS...>::type;
 };
 template<typename E>
 using InvertT = typename Invert<E>::type;

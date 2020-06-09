@@ -13,6 +13,10 @@ struct BaseUnitA2 {
 struct BaseUnitB {
     static inline const char* symbol = "B";
 };
+template<char C>
+struct BaseUnitDynamic {
+    static inline std::string symbol = std::string(1, C);
+};
 
 using UnitA1_m = Unit<BaseUnitA1, std::milli, int>;
 using UnitA1 = Unit<BaseUnitA1, std::ratio<1>, int>;
