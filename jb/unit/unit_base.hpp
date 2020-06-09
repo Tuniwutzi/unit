@@ -14,6 +14,8 @@ public:
     using ratio = RATIO;
     using rep = REP;
 
+    static_assert(!std::is_same_v<BASE_UNIT, void>, "Base unit must not be void");
+
 
     explicit Unit(REP count)
         :_count(count) {

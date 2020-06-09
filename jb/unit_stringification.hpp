@@ -108,6 +108,98 @@ const std::string& baseUnitString(BASE_UNIT) {
     return rv;
 }
 
+template<typename... FACTORS>
+const std::string& baseUnitString(relations::Product<FACTORS...>);
+template<typename T>
+const std::string& baseUnitString(relations::Inverse<T>);
+
+namespace {
+template<typename... FACTORS>
+struct ProductString;
+template<typename FIRST, typename... REST>
+struct ProductString<FIRST, REST...> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
+        numerators[baseUnitString(FIRST())]++;
+        ProductString<REST...>::append(numerators, denominators);
+    }
+};
+template<typename FIRST, typename... REST>
+struct ProductString<relations::Inverse<FIRST>, REST...> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denominators) {
+        denominators[baseUnitString(FIRST())]++;
+        ProductString<REST...>::append(numerators, denominators);
+    }
+};
+template<>
+struct ProductString<> {
+    template<typename BUFFER_TYPE>
+    static void append(BUFFER_TYPE& numerators, BUFFER_TYPE& denomiators) {
+    }
+};
+}
+
+template<typename... FACTORS>
+const std::string& baseUnitString(relations::Product<FACTORS...>) {
+    static const std::string rv = []() {
+        std::map<std::string, size_t> numerators, denominators;
+        auto stringify = [](const auto& map) {
+            std::stringstream rv;
+
+            if (map.size() > 1) {
+                rv << "(";
+            }
+
+            bool first = true;
+            for (const auto& [string, power] : map) {
+                if (first) {
+                    first = false;
+                } else {
+                    rv << "*";
+                }
+
+                rv << string;
+                if (power > 1) {
+                    rv << "^" << power;
+                }
+            }
+
+            if (map.size() > 1) {
+                rv << ")";
+            }
+
+            return rv.str();
+        };
+
+        ProductString<FACTORS...>::append(numerators, denominators);
+
+        std::string rv = "(";
+
+        if (!numerators.empty()) {
+            rv += stringify(numerators);
+        } else {
+            rv += "1";
+        }
+
+        if (!denominators.empty()) {
+            rv += "/";
+
+            rv += stringify(denominators);
+        }
+
+        return rv + ")";
+    }();
+    return rv; 
+};
+template<typename T>
+const std::string& baseUnitString(relations::Inverse<T>) {
+    static const std::string rv = []() {
+        return "(1/" + baseUnitString(T()) + ")";
+    }();
+    return rv;
+}
+
 }
 }
 }

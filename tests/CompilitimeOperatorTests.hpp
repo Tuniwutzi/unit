@@ -93,6 +93,10 @@ struct MultiplicationTest {
 template<typename A, typename B>
 constexpr bool IsMultiplicationValidV = IsFunctorValidV<MultiplicationTest<A, B>>;
 template<typename A, typename B>
+static constexpr bool isMultiplicationValid(A, B) {
+    return IsMultiplicationValidV<std::decay_t<A>, std::decay_t<B>>;
+}
+template<typename A, typename B>
 using MultiplicationResultT = FunctorResultT<MultiplicationTest<A, B>>;
 template<typename A, typename B, typename R>
 constexpr bool ValidateMultiplicationResultV = std::is_same_v<MultiplicationResultT<A, B>, R>;
@@ -105,6 +109,10 @@ struct DivisionTest {
 };
 template<typename A, typename B>
 constexpr bool IsDivisionValidV = IsFunctorValidV<DivisionTest<A, B>>;
+template<typename A, typename B>
+static constexpr bool isDivisionValid(A, B) {
+    return IsDivisionValidV<std::decay_t<A>, std::decay_t<B>>;
+}
 template<typename A, typename B>
 using DivisionResultT = FunctorResultT<DivisionTest<A, B>>;
 template<typename A, typename B, typename R>
