@@ -13,12 +13,6 @@ target_include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set_target_properties(
-    ${TARGET}
-    PROPERTIES
-        PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/jb/unit.hpp"
-)
-
 target_compile_features(
     ${TARGET}
     INTERFACE
@@ -29,4 +23,4 @@ if(${CONFIGURE_TESTS})
     add_subdirectory(tests)
 endif()
 
-install(TARGETS ${TARGET} PUBLIC_HEADER DESTINATION "include/jb")
+INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/jb" DESTINATION "include" )
